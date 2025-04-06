@@ -1,0 +1,5 @@
+Sort images
+sort by date created, last_modified
+# Should sort_by_type be '>= 2' like sort_by_similarity?
+If 'include subfolders' is clicked or unclicked after analyzing, add a note "MUST REANALYZE TO TAKE AFFECT"
+# Implement safer folder moving for duplicates
