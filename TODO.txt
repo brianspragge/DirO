@@ -1,5 +1,5 @@
-Sort images
-sort by date created, last_modified
+1) [x]'Delete Empty Folders'
+2) 'Sort Images', 'Sort By Date Created', 'Last modified'
+3) Analyze after pressing [x]s
 # Should sort_by_type be '>= 2' like sort_by_similarity?
-If 'include subfolders' is clicked or unclicked after analyzing, add a note "MUST REANALYZE TO TAKE AFFECT"
 # Implement safer folder moving for duplicates

@@ -65,26 +65,49 @@ def sort_by_type(files, recursive=False, base_path=None):
     return suggestions
 
 def sort_by_similarity(files):
+    def similarity_score(name1, name2):
+        s1 = name1.rsplit('.', 1)[0].lower()
+        s2 = name2.rsplit('.', 1)[0].lower()
+
+        if abs(len(s1) - len(s2)) > max(len(s1), len(s2)) // 2:
+            return 0
+
+        common = sum(1 for c in set(s1) if c in s2)
+        total = max(len(s1), len(s2))
+        score = (common / total) * 100 if total > 0 else 0
+
+        prefix_len = 0
+        for c1, c2 in zip(s1, s2):
+            if c1 != c2:
+                break
+            prefix_len += 1
+        if prefix_len >= 3:
+            score = min(100, score + prefix_len * 5)
+
+        return score
+
     suggestions = {}
-    by_start = {}
-    for f in files:
-        if f["words"]:
-            by_start.setdefault(f["words"][0], []).append(f["name"])
-    filenames = list(by_start.keys())
-    if len(filenames) >= 2:
-        normalized = [n.rsplit('.', 1)[0] for n in filenames]
-        for i, name1 in enumerate(normalized):
-            for j in range(i + 1, len(normalized)):
-                words1 = set(name1.split())
-                words2 = set(normalized[j].split())
-                shared = len(words1 & words2)
-                total = len(words1 | words2)
-                if total > 0 and shared / total > 0.15:
-                    folder = f"Similar_{filenames[i].split('.')[0][:5]}"
-                    suggestions.setdefault(folder, []).extend(
-                        by_start[filenames[i]] + by_start[filenames[j]]
-                    )
-    return {k: list(set(v)) for k, v in suggestions.items()}  # Remove duplicates
+    processed = set()
+
+    for i, f1 in enumerate(files):
+        if f1["path"] in processed:
+            continue
+        group = [f1["path"]]
+        folder_name = f1["name"].rsplit('.', 1)[0][:5]
+
+        for f2 in files[i+1:]:
+            if f2["path"] in processed:
+                continue
+            score = similarity_score(f1["name"], f2["name"])
+            if score >= 60:
+                group.append(f2["path"])
+                processed.add(f2["path"])
+
+        if len(group) > 1:
+            suggestions[f"Similar_{folder_name}"] = group
+        processed.add(f1["path"])
+
+    return suggestions
 
 def sort_all_files(files):
     if files:
