@@ -1,5 +1,74 @@
 1) [x]'Delete Empty Folders'
 2) 'Sort Images', 'Sort By Date Created', 'Last modified'
 3) Analyze after pressing [x]s
+4) [x]'Search File Contents'
+
 # Should sort_by_type be '>= 2' like sort_by_similarity?
 # Implement safer folder moving for duplicates
+
+4) Fix dupelicate file/folder check:
+	import os
+	import hashlib
+	from collections import defaultdict
+
+	def hash_file(file_path):
+	    hasher = hashlib.md5()
+	    with open(file_path, "rb") as f:
+		for chunk in iter(lambda: f.read(4096), b""):
+		    hasher.update(chunk)
+	    return hasher.hexdigest()
+
+	def find_duplicates(directory):
+	    hashes = defaultdict(list)
+	    for root, _, files in os.walk(directory):
+		for filename in files:
+		    file_path = os.path.join(root, filename)
+		    if os.path.getsize(file_path) == 0:
+			continue
+		    file_hash = hash_file(file_path)
+		    hashes[file_hash].append(file_path)
+	    return {h: paths for h, paths in hashes.items() if len(paths) > 1}
+
+	duplicates = find_duplicates("/path/to/directory")
+	for file_hash, paths in duplicates.items():
+	    print(f"Duplicates with hash {file_hash}: {paths}"
+
+or
+
+	def find_duplicates(directory, recursive=False):
+	    hashes = defaultdict(list)
+	    for root, _, files in (os.walk(directory) if recursive else [(directory, [], os.listdir(directory))]):
+		for filename in files:
+		    file_path = os.path.join(root, filename)
+		    if os.path.isfile(file_path) and os.path.getsize(file_path) > 0:
+			file_hash = hash_file(file_path)
+			hashes[file_hash].append(file_path)
+	    return {h: paths for h, paths in hashes.items() if len(paths) > 1}
+
+	def move_duplicates_content(duplicates, base_path):
+	    if not duplicates:
+		return
+	    dup_folder = os.path.join(base_path, "duplicates_content")
+	    os.makedirs(dup_folder, exist_ok=True)
+	    moved_files = []
+	    for paths in duplicates.values():
+		for i, path in enumerate(paths[1:], 1):  # Keep first, move others
+		    dest_path = os.path.join(dup_folder, f"{i}_{os.path.basename(path)}")
+		    shutil.move(path, dest_path)
+		    moved_files.append(dest_path)
+	    for dest_path in moved_files:
+		while not os.path.exists(dest_path):
+		    pass
+
+	# In main(), add a new button and connect it
+	content_dup_btn = QPushButton("Sort Duplicates by Content")
+	content_dup_btn.setEnabled(False)
+	layout.addWidget(content_dup_btn)
+	def on_sort_duplicates_content():
+	    if current_folder[0]:
+		dups = find_duplicates(current_folder[0], recursive=cleanup_checkbox.isChecked())
+		move_duplicates_content(dups, current_folder[0])
+		status_label.setText("Content-based duplicates sorted successfully!")
+		reset_and_reanalyze()
+	content_dup_btn.clicked.connect(on_sort_duplicates_content)
+	# Enable button when folder is selected in on_select())

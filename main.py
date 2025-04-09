@@ -9,7 +9,17 @@ from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout,
                               QPushButton, QTextEdit, QLabel, QFileDialog, QCheckBox)
 
 def select_folder(parent):
-    return QFileDialog.getExistingDirectory(parent, "Select Directory")
+    dialog = QFileDialog(parent, "Select Directory")
+    dialog.setFileMode(QFileDialog.Directory)
+    dialog.setOption(QFileDialog.DontUseNativeDialog, True) 
+    if dialog.exec():
+        selected = dialog.selectedFiles()
+        current_dir = dialog.directory().absolutePath()
+        print(f":Selected: {selected}, Current: {current_dir}")
+        if selected and selected[0] and len(selected[0].split('/')) > len(current_dir.split('/')):
+            return selected[0]
+        return current_dir
+    return None
 
 def get_file_info(folder_path, recursive=False):
     files = []
@@ -138,7 +148,7 @@ def organize_files(suggestions, recursive=False, base_path=None):
                 print(f"Error moving {file_path}: {e}")
     for dest_path in moved_files:
         while not os.path.exists(dest_path):
-            pass  # Wait for move to complete
+            pass
 
     if recursive:
         empty_folders_found = False
@@ -214,6 +224,7 @@ def main():
         folder = select_folder(window)
         if folder:
             current_folder[0] = folder
+            status_label.setText(f"selected: {folder} (click OK to confirm)")
             files, duplicates = get_file_info(folder, recursive=cleanup_checkbox.isChecked())
             current_files[0] = files
             current_duplicates[0] = duplicates
@@ -246,7 +257,7 @@ def main():
                 largest_group = max(len(files) for files in suggestion.values()) if suggestion else 0
                 text += f"By {name} ({num_groups} groups, largest: {largest_group}):\n"
                 for folder_name, paths in suggestion.items():
-                    samples = [os.path.basename(p) for p in paths[:2]]  # Limit to 2 samples
+                    samples = [os.path.basename(p) for p in paths[:2]]
                     if folder_name == folder:
                         text += f"  Main Directory: {len(paths)} files (e.g., {', '.join(samples)})\n"
                     else:
@@ -271,7 +282,6 @@ def main():
             current_files[0] = None
             current_duplicates[0] = None
             current_suggestions[0] = None
-            on_select()
 
     def make_organize(name):
         def on_organize():
