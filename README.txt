@@ -7,3 +7,4 @@ all, which will take all the files and files in folders in a given
 directory and move them to a single file in the chosen directory.
 All of the extra folders are deleted or moved to an empty folder
 next to the files' folder.
+
