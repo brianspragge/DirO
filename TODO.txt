@@ -1,2 +1,3 @@
 1) 'Sort Images', 'Sort By Date Created', 'Last modified'
 2) Analyze after pressing [x]s
+3) Add Tests
