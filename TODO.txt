@@ -1,6 +1,2 @@
-1) [x]'Delete Empty Folders'
-2) 'Sort Images', 'Sort By Date Created', 'Last modified'
-3) Analyze after pressing [x]s
-4) [x]'Search File Contents'
-
-# Implement safer folder moving for duplicates
+1) 'Sort Images', 'Sort By Date Created', 'Last modified'
+2) Analyze after pressing [x]s
