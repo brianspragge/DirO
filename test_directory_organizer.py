@@ -209,10 +209,10 @@ class TestDirectoryOrganizer(unittest.TestCase):
             'Type txt': ['/test/file1.txt']
         }
         mock_walk.side_effect = [
-            [('/test/empty', [], [])],  # First walk to detect
-            [('/test/empty', [], [])]   # Second walk to delete
+            [('/test/empty', [], [])],
+            [('/test/empty', [], [])]
         ]
-        mock_listdir.side_effect = [[], ['file1.txt']]  # Empty folder, then non-empty root
+        mock_listdir.side_effect = [[], ['file1.txt'], []]  # Add third return for deletion check
         organize_files(suggestions, recursive=True, cleanup=True, delete_empty=True, base_path='/test')
         mock_makedirs.assert_called()
         mock_move.assert_called_with('/test/file1.txt', '/test/Type txt/file1.txt')
@@ -230,7 +230,7 @@ class TestDirectoryOrganizer(unittest.TestCase):
             [('/test/empty', [], [])],
             [('/test/empty', [], [])]
         ]
-        mock_listdir.side_effect = [[], ['file1.txt'], []]  # Extra empty for move check
+        mock_listdir.side_effect = [[], ['file1.txt'], [], []]  # Extra return for safety
         organize_files(suggestions, recursive=True, cleanup=True, delete_empty=False, base_path='/test')
         mock_makedirs.assert_any_call('/test/Empty Folders', exist_ok=True)
         mock_move.assert_any_call('/test/empty', '/test/Empty Folders/empty')

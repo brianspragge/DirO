@@ -65,8 +65,8 @@ EMPTY_FOLDERS_FOLDER = "Empty Folders"
 
 def select_folder(parent):
     dialog = QFileDialog(parent, "Select Directory")
-    dialog.setFileMode(QFileDialog.Directory)
-    dialog.setOption(QFileDialog.DontUseNativeDialog, True)
+    dialog.setFileMode(QFileDialog.FileMode.Directory)
+    dialog.setOption(QFileDialog.Option.DontUseNativeDialog, True)
     if dialog.exec():
         selected = dialog.selectedFiles()
         current_dir = dialog.directory().absolutePath()
@@ -411,7 +411,7 @@ def main():
     select_btn.clicked.connect(on_select)
     for name, btn in buttons.items():
         btn.clicked.connect(make_organize(name))
-    dup_btn.clicked.connect(on_sort_duplicates)
+#    dup_btn.clicked.connect(on_sort_duplicates)
 
     window.show()
     sys.exit(app.exec())
