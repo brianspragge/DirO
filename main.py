@@ -124,7 +124,6 @@ def sort_by_type(files, recursive=False, base_path=None):
     by_type = {}
     for f in files:
         by_type.setdefault(f["ext"], []).append(f["path"])
-
     if recursive and base_path:
         for ext, paths in by_type.items():
             if len(paths) > 1:
@@ -133,8 +132,7 @@ def sort_by_type(files, recursive=False, base_path=None):
                 suggestions.setdefault(base_path, []).append(paths[0])
     else:
         for ext, paths in by_type.items():
-            if len(paths) > 1:
-                suggestions[f"{TYPE_PREFIX}{ext[1:]}" if ext != ".no_extension" else NO_EXTENSION_FOLDER] = paths
+            suggestions[f"{TYPE_PREFIX}{ext[1:]}" if ext != ".no_extension" else NO_EXTENSION_FOLDER] = paths
     return suggestions
 
 def sort_by_similarity(files, check_contents=False):
@@ -204,7 +202,6 @@ def move_files_into_one_folder(files, check_contents=False):
 # ============================================================================
 
 def organize_files(suggestions, recursive=False, cleanup=False, delete_empty=False, base_path=None):
-    moved_files = []
     root_path = base_path if base_path else suggestions[next(iter(suggestions))][0].rsplit('/', 1)[0]
 
     for folder_name, files in suggestions.items():
@@ -214,12 +211,8 @@ def organize_files(suggestions, recursive=False, cleanup=False, delete_empty=Fal
             dest_path = os.path.join(new_folder, os.path.basename(file_path))
             try:
                 shutil.move(file_path, dest_path)
-                moved_files.append(dest_path)
             except Exception as e:
                 print(f"Error moving {file_path}: {e}")
-    for dest_path in moved_files:
-        while not os.path.exists(dest_path):
-            pass
 
     if recursive and cleanup:
         empty_folders_found = False
@@ -250,7 +243,6 @@ def move_duplicates(duplicates, base_path, check_contents=False):
         return
     dup_folder = os.path.join(base_path, DUPLICATES_FOLDER)
     os.makedirs(dup_folder, exist_ok=True)
-    moved_files = []
 
     if check_contents:
         by_hash = {}
@@ -263,15 +255,16 @@ def move_duplicates(duplicates, base_path, check_contents=False):
         final_dups = duplicates
 
     for i, path in enumerate(final_dups):
-        dest_path = os.path.join(dup_folder, f"{DUPLICATE_PREFIX}{i}_{os.path.basename(path)}")
+        base_name = os.path.basename(path)
+        dest_path = os.path.join(dup_folder, f"{DUPLICATE_PREFIX}{i}_{base_name}")
+        counter = i
+        while os.path.exists(dest_path):
+            counter += 1
+            dest_path = os.path.join(dup_folder, f"{DUPLICATE_PREFIX}{counter}_{base_name}")
         try:
             shutil.move(path, dest_path)
-            moved_files.append(dest_path)
         except Exception as e:
             print(f"Error moving duplicate {path}: {e}")
-    for dest_path in moved_files:
-        while not os.path.exists(dest_path):
-            pass
 
 # ============================================================================
 # Main Application
@@ -418,7 +411,7 @@ def main():
     select_btn.clicked.connect(on_select)
     for name, btn in buttons.items():
         btn.clicked.connect(make_organize(name))
-#    dup_btn.clicked.connect(on_sort_duplicates)
+    dup_btn.clicked.connect(on_sort_duplicates)
 
     window.show()
     sys.exit(app.exec())
