@@ -1,3 +1,12 @@
+==========
+|FEATURES|
+==========
 1) 'Sort Images', 'Sort By Date Created', 'Last modified'
+2) Add Tests
+
+======
+|BUGS|
+======
+1) [x] subfolders, [x] check contents, sort similar: Even if contents are the same on two files,
+	it will not place files together if they have the same name.
 2) Analyze after pressing [x]s
-3) Add Tests

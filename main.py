@@ -14,10 +14,10 @@ UI Layout Preview:
 |                                                       |
 |                [      Select Folder      ]            |
 |                                                       |
+| [ ] Sort By Contents(not name)                        |
 | [ ] Include Subfolders                                |
-| [ ] Empty Folders in One Folder                       |
 | [ ] Delete Empty Folders                              |
-| [ ] Check Contents(4KB/File)                          |
+| [ ] Sort Empty Folders                                |
 |                                                       |
 | +--------------------------------------------------+  |
 | |                                                  |  |
@@ -41,14 +41,14 @@ UI Layout Preview:
 
 # UI Element Labels
 BUTTON_SELECT_FOLDER = "Select Folder"
+CHECKBOX_CHECK_CONTENTS = "Sort By Contents(not name)"
 CHECKBOX_INCLUDE_SUBFOLDERS = "Include Subfolders"
-CHECKBOX_CLEANUP_EMPTY = "Empty Folders in One Folder"
 CHECKBOX_DELETE_EMPTY = "Delete Empty Folders"
-CHECKBOX_CHECK_CONTENTS = "Check Contents(4KB/File)"
-BUTTON_ORGANIZE_TYPE = "Type Organization"
-BUTTON_ORGANIZE_SIMILARITY = "Similarity Organization"
-BUTTON_ORGANIZE_ONE_FOLDER = "Files into One Folder"
-BUTTON_SORT_DUPLICATES = "Duplicates Organization"
+CHECKBOX_CLEANUP_EMPTY = "Sort Empty Folders"
+BUTTON_ORGANIZE_TYPE = "Sort Type"
+BUTTON_ORGANIZE_SIMILARITY = "Sort Similar"
+BUTTON_ORGANIZE_ONE_FOLDER = "Move Files to Single Folder"
+BUTTON_SORT_DUPLICATES = "COMING SOON"  # "Move Duplicates to Single Folder" -button is disabled below: line ~421
 
 # Folder Name Variables
 TYPE_PREFIX = "Type "
@@ -76,6 +76,7 @@ def select_folder(parent):
         return current_dir
     return None
 
+# TODO -Brian: add more info to duplicates.append(file_path, file name for folder?)
 def get_file_info(folder_path, recursive=False):
     files = []
     seen_names = {}
@@ -279,7 +280,7 @@ def move_duplicates(duplicates, base_path, check_contents=False):
 def main():
     app = QApplication(sys.argv)
     window = QMainWindow()
-    window.setWindowTitle("File Explorer and Organizer")
+    window.setWindowTitle("DirO - Directory Organizer")
     window.setGeometry(100, 100, 800, 600)
 
     widget = QWidget()
@@ -288,10 +289,10 @@ def main():
 
     # UI Elements
     select_btn = QPushButton(BUTTON_SELECT_FOLDER)
-    subfolders_checkbox = QCheckBox(CHECKBOX_INCLUDE_SUBFOLDERS)
-    cleanup_checkbox = QCheckBox(CHECKBOX_CLEANUP_EMPTY)
-    delete_empty_checkbox = QCheckBox(CHECKBOX_DELETE_EMPTY)
     content_checkbox = QCheckBox(CHECKBOX_CHECK_CONTENTS)
+    subfolders_checkbox = QCheckBox(CHECKBOX_INCLUDE_SUBFOLDERS)
+    delete_empty_checkbox = QCheckBox(CHECKBOX_DELETE_EMPTY)
+    cleanup_checkbox = QCheckBox(CHECKBOX_CLEANUP_EMPTY)
     results_text = QTextEdit()
     results_text.setReadOnly(True)
     status_label = QLabel("")
@@ -314,8 +315,8 @@ def main():
     button_order = [
         (BUTTON_ORGANIZE_TYPE, "Type"),
         (BUTTON_ORGANIZE_SIMILARITY, "Similarity"),
+        (BUTTON_ORGANIZE_ONE_FOLDER, "Move Files into One Folder"),
         (BUTTON_SORT_DUPLICATES, None),  # Special case for duplicates
-        (BUTTON_ORGANIZE_ONE_FOLDER, "Move Files into One Folder")
     ]
     buttons = {}
 
@@ -417,7 +418,7 @@ def main():
     select_btn.clicked.connect(on_select)
     for name, btn in buttons.items():
         btn.clicked.connect(make_organize(name))
-    dup_btn.clicked.connect(on_sort_duplicates)
+#    dup_btn.clicked.connect(on_sort_duplicates)
 
     window.show()
     sys.exit(app.exec())
