@@ -2,7 +2,6 @@
 |FEATURES|
 ==========
 1) 'Sort Images', 'Sort By Date Created', 'Last modified'
-2) Add Tests
 
 ======
 |BUGS|
