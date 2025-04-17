@@ -10,3 +10,9 @@ next to the files' folder.
 
 Build: pyinstaller --clean --onefile --name DirO --contents-directory build main.py
 Platforms supported: Linux (Soon to be Windows and MacOS)
+
+
+HOW TO INSTALL:
+1) Clone installer/
+2) Execute installer/install.sh
+3) Delete installer/
