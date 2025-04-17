@@ -9,3 +9,4 @@ All of the extra folders are deleted or moved to an empty folder
 next to the files' folder.
 
 Build: pyinstaller --clean --onefile --name DirO --contents-directory build main.py
+Platforms supported: Linux (Soon to be Windows and MacOS)
