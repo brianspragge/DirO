@@ -24,7 +24,6 @@ logging.basicConfig(
 # UI Layout Preview 
 # ============================================================================
 """
-UI Layout Preview:
 +-------------------------------------------------------+
 |                                                       |
 |                [      Select Folder      ]            |
@@ -53,7 +52,6 @@ UI Layout Preview:
 # ============================================================================
 # Global Constants 
 # ============================================================================
-
 # UI Element Labels
 BUTTON_SELECT_FOLDER = "Select Folder"
 CHECKBOX_CHECK_CONTENTS = "Sort By Contents(not name)"
@@ -77,7 +75,6 @@ EMPTY_FOLDERS_FOLDER = "Empty Folders"
 # ============================================================================
 # File Handling Functions
 # ============================================================================
-
 def safe_move_file(src, dest_folder, prefix=""):
     base_name = os.path.basename(src)
     dest = os.path.join(dest_folder, f"{prefix}{base_name}")
@@ -163,7 +160,6 @@ def hash_file(file_path):
 # ============================================================================
 # Sorting Functions 
 # ============================================================================
-
 def sort_by_type(files, recursive=False, base_path=None):
     suggestions = {}
     by_type = {}
@@ -256,7 +252,6 @@ def move_files_into_one_folder(files, check_contents=False):
 # ============================================================================
 # File Organization Functions 
 # ============================================================================
-
 def organize_files(
     suggestions, recursive=False, cleanup=False,
     delete_empty=False, base_path=None
@@ -347,7 +342,6 @@ def move_duplicates(duplicates, base_path, check_contents=False):
 # ============================================================================
 # Helper Functions
 # ============================================================================
-
 def analyze_folder(folder, recursive=False, check_contents=False):
     """Analyze the folder and generate organization suggestions."""
     files, duplicates = get_file_info(folder, recursive=recursive)
@@ -404,7 +398,6 @@ def update_results(files, duplicates, suggestions, results_text, buttons, dup_bt
 # ============================================================================
 # Main Application
 # ============================================================================
-
 def main():
     app = QApplication(sys.argv)
     window = QMainWindow()

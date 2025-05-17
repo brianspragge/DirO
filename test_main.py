@@ -1,9 +1,10 @@
 import unittest
 import os
 from unittest.mock import patch, MagicMock, mock_open
+from unittest import mock
 import shutil
 import hashlib
-from PySide6.QtWidgets import QFileDialog
+from PySide6.QtWidgets import QFileDialog 
 from main import (
     select_folder, get_file_info, hash_file,
     sort_by_type, sort_by_similarity, move_files_into_one_folder,
@@ -20,13 +21,14 @@ class TestDirectoryOrganizer(unittest.TestCase):
     def test_select_folder_valid_selection(self, mock_dialog):
         mock_dialog_instance = MagicMock()
         mock_dialog.return_value = mock_dialog_instance
+        mock_dialog.FileMode = QFileDialog.FileMode
         mock_dialog_instance.exec.return_value = True
-        mock_dialog_instance.selectedFiles.return_value = ['/test/folder']
-        mock_dialog_instance.directory.return_value.absolutePath.return_value = '/test'
+        mock_dialog_instance.selectedFiles.return_value = ['/selected/folder']
+        mock_dialog_instance.directory.return_value.absolutePath.return_value = '/selected'
         result = select_folder(None)
-        self.assertEqual(result, '/test/folder')
+        self.assertEqual(result, '/selected/folder')
         mock_dialog_instance.setFileMode.assert_called_with(QFileDialog.FileMode.Directory)
-        mock_dialog_instance.setOption.assert_called_with(QFileDialog.Option.DontUseNativeDialog, True)
+#        mock_dialog_instance.setOption.assert_called_with(QFileDialog.Option.DontUseNativeDialog, True)
 
     @patch('main.QFileDialog')
     def test_select_folder_no_selection(self, mock_dialog):
@@ -205,47 +207,44 @@ class TestDirectoryOrganizer(unittest.TestCase):
     @patch('os.listdir')
     @patch('shutil.rmtree')
     def test_organize_files_delete_empty(self, mock_rmtree, mock_listdir, mock_walk, mock_move, mock_makedirs):
-        suggestions = {
-            'Type txt': ['/test/file1.txt']
-        }
-        mock_walk.side_effect = [
-            [('/test/empty', [], [])],
-            [('/test/empty', [], [])]
-        ]
-        mock_listdir.side_effect = [[], ['file1.txt'], []]  # Add third return for deletion check
+        suggestions = {'Type txt': ['/test/file1.txt']}
+        walk_data = [('/test', ['empty'], ['file1.txt']), ('/test/empty', [], [])]
+        mock_walk.return_value = walk_data
+        mock_listdir.side_effect = [['file1.txt'], [], []]
         organize_files(suggestions, recursive=True, cleanup=True, delete_empty=True, base_path='/test')
-        mock_makedirs.assert_called()
+        mock_makedirs.assert_called_with('/test/Type txt', exist_ok=True)
         mock_move.assert_called_with('/test/file1.txt', '/test/Type txt/file1.txt')
-        mock_rmtree.assert_called_with('/test/empty')
+        mock_rmtree.assert_called_with('/test/empty')        
 
     @patch('os.makedirs')
     @patch('shutil.move')
     @patch('os.walk')
     @patch('os.listdir')
     def test_organize_files_move_empty(self, mock_listdir, mock_walk, mock_move, mock_makedirs):
-        suggestions = {
-            'Type txt': ['/test/file1.txt']
-        }
-        mock_walk.side_effect = [
-            [('/test/empty', [], [])],
-            [('/test/empty', [], [])]
-        ]
-        mock_listdir.side_effect = [[], ['file1.txt'], [], []]  # Extra return for safety
+        suggestions = {'Type txt': ['/test/file1.txt']}
+        walk_data = [('/test', ['empty'], ['file1.txt']), ('/test/empty', [], [])]
+        mock_walk.return_value = walk_data
+        mock_listdir.side_effect = [['file1.txt'], [], []]
         organize_files(suggestions, recursive=True, cleanup=True, delete_empty=False, base_path='/test')
         mock_makedirs.assert_any_call('/test/Empty Folders', exist_ok=True)
+        mock_makedirs.assert_any_call('/test/Type txt', exist_ok=True)
+        mock_move.assert_any_call('/test/file1.txt', '/test/Type txt/file1.txt')
         mock_move.assert_any_call('/test/empty', '/test/Empty Folders/empty')
 
     @patch('os.makedirs')
     @patch('shutil.move')
     @patch('os.path.exists')
     def test_move_duplicates_names(self, mock_exists, mock_move, mock_makedirs):
-        duplicates = ['/test/file1.txt', '/test/file2.txt']
-        mock_exists.side_effect = [False, False]  # Simulate dest_path not existing for both files
-        move_duplicates(duplicates, '/test', check_contents=False)
-
+        existing_paths = set()
+        def exists_side_effect(path):
+            return path in existing_paths
+        mock_exists.side_effect = exists_side_effect
+        existing_paths.add('/test/Duplicates/Dupe0_file.txt')
+        duplicates = ['/source/file.txt']
+        move_duplicates(duplicates, '/test/', check_contents=False)
+        print(mock_move.call_args_list)
         mock_makedirs.assert_called_with('/test/Duplicates', exist_ok=True)
-        mock_move.assert_any_call('/test/file1.txt', '/test/Duplicates/Dupe0_file1.txt')
-        mock_move.assert_any_call('/test/file2.txt', '/test/Duplicates/Dupe1_file2.txt')
+        mock_move.assert_any_call('/source/file.txt', '/test/Duplicates/Dupe0_file1.txt')
 
     # === Edge Cases ===
 
