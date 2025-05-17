@@ -4,7 +4,7 @@ from unittest.mock import patch, MagicMock, mock_open
 import shutil
 import hashlib
 from PySide6.QtWidgets import QFileDialog
-from directory_organizer import (
+from main import (
     select_folder, get_file_info, hash_file,
     sort_by_type, sort_by_similarity, move_files_into_one_folder,
     organize_files, move_duplicates,
@@ -16,7 +16,7 @@ class TestDirectoryOrganizer(unittest.TestCase):
 
     # === File Handling Functions ===
 
-    @patch('directory_organizer.QFileDialog')
+    @patch('main.QFileDialog')
     def test_select_folder_valid_selection(self, mock_dialog):
         mock_dialog_instance = MagicMock()
         mock_dialog.return_value = mock_dialog_instance
@@ -28,7 +28,7 @@ class TestDirectoryOrganizer(unittest.TestCase):
         mock_dialog_instance.setFileMode.assert_called_with(QFileDialog.FileMode.Directory)
         mock_dialog_instance.setOption.assert_called_with(QFileDialog.Option.DontUseNativeDialog, True)
 
-    @patch('directory_organizer.QFileDialog')
+    @patch('main.QFileDialog')
     def test_select_folder_no_selection(self, mock_dialog):
         # Setup mock
         mock_dialog_instance = MagicMock()
@@ -143,7 +143,7 @@ class TestDirectoryOrganizer(unittest.TestCase):
         }
         self.assertEqual(suggestions, expected)
 
-    @patch('directory_organizer.hash_file')
+    @patch('main.hash_file')
     def test_sort_by_similarity_contents(self, mock_hash):
         files = [
             {'path': '/test/file1.txt', 'name': 'file1.txt', 'ext': '.txt', 'words': ['file1']},
